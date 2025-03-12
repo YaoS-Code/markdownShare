@@ -7,6 +7,7 @@ import rehypeRaw from 'rehype-raw';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
+import PythonSandbox from './PythonSandbox';
 
 interface MarkdownRendererProps {
     content: string;
@@ -259,7 +260,22 @@ export default function MarkdownRenderer({ content, filePath, basePath }: Markdo
                         >
                             {props.children}
                         </a>
-                    )
+                    ),
+                    code: (props) => {
+                        const { className, children } = props as { className?: string; children: React.ReactNode };
+                        const match = /language-(\w+)/.exec(className || '');
+                        const language = match && match[1] ? match[1] : '';
+
+                        // If it's not a Python code block, render normally
+                        if (language !== 'python') {
+                            return <code {...props} />;
+                        }
+
+                        // For Python code blocks, use our PythonSandbox component
+                        return (
+                            <PythonSandbox code={String(children).replace(/\n$/, '')} />
+                        );
+                    }
                 }}
             >
                 {processedContent}

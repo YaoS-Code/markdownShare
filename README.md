@@ -8,6 +8,7 @@
 - 支持 Obsidian 格式的 Markdown 文件
 - 支持 Obsidian 属性表格显示
 - 支持图片显示（包括本地图片和网络图片）
+- 支持 Python 代码块交互式运行（内置代码沙箱）
 - 响应式设计，适配桌面和移动设备
 - 支持深色模式和浅色模式
 - Docker 部署支持
@@ -140,6 +141,31 @@ services:
       - WEBDAV_PASSWORD=${WEBDAV_PASSWORD}
     restart: unless-stopped
 ```
+
+## 使用指南
+
+### Python 代码沙箱
+
+Markdown Share 支持在 Markdown 文件中运行 Python 代码块。使用方法：
+
+1. 在 Markdown 文件中创建一个 Python 代码块：
+
+````markdown
+​`python
+print("Hello, World!")
+for i in range(5):
+    print(f"Number: {i}")
+​`
+````
+
+2. 在查看页面中，Python 代码块会显示一个"Run"按钮
+3. 点击"Run"按钮执行代码，结果会显示在代码块下方
+
+注意事项：
+
+- 代码执行在服务器端进行，有 5 秒的执行时间限制
+- 代码长度限制为 10,000 个字符
+- 出于安全考虑，某些系统操作可能被限制
 
 ## 常见问题
 

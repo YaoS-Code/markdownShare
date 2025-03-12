@@ -1,5 +1,8 @@
 FROM node:18-alpine AS base
 
+# Install Python and other dependencies
+RUN apk add --no-cache python3 py3-pip
+
 # 安装依赖
 FROM base AS deps
 WORKDIR /app
@@ -35,6 +38,9 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Create a directory for temporary Python files with appropriate permissions
+RUN mkdir -p /tmp && chmod 777 /tmp
 
 # 切换到非root用户
 USER nextjs
