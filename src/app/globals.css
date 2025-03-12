@@ -644,3 +644,146 @@ body {
   font-size: 0.9rem;
   color: var(--text-muted);
 }
+
+/* 添加Obsidian属性表格的样式 */
+.obsidian-properties {
+  margin: 1.5rem 0 2.5rem;
+  background-color: rgba(248, 249, 250, 0.7);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+  backdrop-filter: blur(8px);
+}
+
+.dark .obsidian-properties {
+  background-color: rgba(45, 51, 59, 0.7);
+  border-color: #374151;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.properties-heading {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  color: #4b5563;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.75rem;
+  letter-spacing: -0.025em;
+}
+
+.dark .properties-heading {
+  color: #e5e7eb;
+  border-color: #374151;
+}
+
+.properties-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.properties-table tr {
+  transition: background-color 0.15s ease;
+}
+
+.properties-table tr:hover {
+  background-color: rgba(243, 244, 246, 0.7);
+}
+
+.dark .properties-table tr:hover {
+  background-color: rgba(55, 65, 81, 0.3);
+}
+
+.property-key {
+  width: 30%;
+  font-weight: 500;
+  color: #6b7280;
+  padding: 0.75rem 1rem 0.75rem 0;
+  vertical-align: top;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 0.9375rem;
+}
+
+.dark .property-key {
+  color: #9ca3af;
+  border-color: #374151;
+}
+
+.property-value {
+  width: 70%;
+  padding: 0.75rem 0;
+  color: #111827;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 0.9375rem;
+}
+
+.dark .property-value {
+  color: #f3f4f6;
+  border-color: #374151;
+}
+
+.properties-table tr:last-child .property-key,
+.properties-table tr:last-child .property-value {
+  border-bottom: none;
+}
+
+.property-tag {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.property-tag:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.dark .property-tag {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+/* 为不同类型的属性添加特殊样式 */
+.property-key[data-key="grade"],
+.property-key[data-key="rate"] {
+  color: #059669;
+}
+
+.dark .property-key[data-key="grade"],
+.dark .property-key[data-key="rate"] {
+  color: #10b981;
+}
+
+.property-key[data-key="status"] {
+  color: #d97706;
+}
+
+.dark .property-key[data-key="status"] {
+  color: #f59e0b;
+}
+
+/* 添加一些动画效果 */
+.obsidian-properties {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

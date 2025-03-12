@@ -28,13 +28,20 @@ export default function MarkdownRenderer({ content, filePath, basePath }: Markdo
 
         console.log(`Processing markdown with directoryPath: ${directoryPath}`);
 
+        // Format Obsidian properties
+        newContent = formatObsidianProperties(newContent);
+
         // Process image paths to make them relative to the WebDAV server
         // Convert Obsidian image markdown format ![alt](attachment/image.png) to proper URLs
+        // Also handle Obsidian width syntax ![alt|width](path)
         newContent = newContent.replace(
-            /!\[(.*?)\]\((.*?)\)/g,
-            (match, alt, src) => {
-                // If the path is already absolute URL, return as is
+            /!\[(.*?)(?:\|(\d+))?\]\((.*?)\)/g,
+            (match, alt, width, src) => {
+                // If the path is already absolute URL, return as is but with width if specified
                 if (src.startsWith('http://') || src.startsWith('https://')) {
+                    if (width) {
+                        return `![${alt}](${src} width=${width}px)`;
+                    }
                     return match;
                 }
 
@@ -43,11 +50,18 @@ export default function MarkdownRenderer({ content, filePath, basePath }: Markdo
                     // Relative path - build proper path based on current file location
                     const absoluteSrc = `${directoryPath}/${src.replace(/^\.\//, '')}`;
                     console.log(`Converting relative image path: ${src} to absolute: ${absoluteSrc}`);
+
+                    if (width) {
+                        return `![${alt}](/api/webdav/image?path=${encodeURIComponent(absoluteSrc)}){width=${width}px}`;
+                    }
                     return `![${alt}](/api/webdav/image?path=${encodeURIComponent(absoluteSrc)})`;
                 }
 
                 // Already absolute path
                 console.log(`Using absolute image path: ${src}`);
+                if (width) {
+                    return `![${alt}](/api/webdav/image?path=${encodeURIComponent(src)}){width=${width}px}`;
+                }
                 return `![${alt}](/api/webdav/image?path=${encodeURIComponent(src)})`;
             }
         );
@@ -133,6 +147,76 @@ export default function MarkdownRenderer({ content, filePath, basePath }: Markdo
         setProcessedContent(newContent);
     }, [content, filePath, basePath]);
 
+    // Function to format Obsidian properties
+    const formatObsidianProperties = (content: string): string => {
+        // Check if the content starts with a properties section
+        if (!content.trim().startsWith('---') || !content.includes('---', 3)) {
+            return content;
+        }
+
+        // Extract the properties section
+        const propertiesMatch = content.match(/^---\n([\s\S]*?)\n---/);
+        if (!propertiesMatch) {
+            return content;
+        }
+
+        const propertiesSection = propertiesMatch[0];
+        const propertiesContent = propertiesMatch[1];
+
+        // Parse the properties
+        const properties: Record<string, string> = {};
+        const propertyLines = propertiesContent.split('\n');
+
+        propertyLines.forEach(line => {
+            const colonIndex = line.indexOf(':');
+            if (colonIndex > 0) {
+                const key = line.substring(0, colonIndex).trim();
+                const value = line.substring(colonIndex + 1).trim();
+                properties[key] = value;
+            }
+        });
+
+        // Create a formatted HTML table for properties
+        let formattedProperties = `
+<div class="obsidian-properties">
+  <h2 class="properties-heading">Properties</h2>
+  <table class="properties-table">
+    <tbody>`;
+
+        // Add each property to the table
+        Object.entries(properties).forEach(([key, value]) => {
+            // Format tags specially
+            if (key === 'tags' && value) {
+                const tags = value.split(',').map((tag: string) => tag.trim());
+                const formattedTags = tags.map((tag: string) =>
+                    `<span class="property-tag">${tag}</span>`
+                ).join(' ');
+
+                formattedProperties += `
+      <tr>
+        <td class="property-key" data-key="${key}">${key}</td>
+        <td class="property-value">${formattedTags}</td>
+      </tr>`;
+            } else {
+                formattedProperties += `
+      <tr>
+        <td class="property-key" data-key="${key}">${key}</td>
+        <td class="property-value">${value || 'Empty'}</td>
+      </tr>`;
+            }
+        });
+
+        formattedProperties += `
+    </tbody>
+  </table>
+</div>
+
+`;
+
+        // Replace the original properties section with the formatted one
+        return content.replace(propertiesSection, formattedProperties);
+    };
+
     return (
         <div className="prose prose-slate max-w-none dark:prose-invert obsidian-markdown">
             <ReactMarkdown
@@ -140,14 +224,32 @@ export default function MarkdownRenderer({ content, filePath, basePath }: Markdo
                 rehypePlugins={[rehypeRaw, rehypeKatex]}
                 components={{
                     // Add custom components for special rendering
-                    img: ({ ...props }) => (
-                        <img
-                            {...props}
-                            className="max-w-full h-auto"
-                            loading="lazy"
-                            alt={props.alt || ''}
-                        />
-                    ),
+                    img: ({ ...props }) => {
+                        // Extract width from the alt text if it exists
+                        let style = {};
+                        const altText = props.alt || '';
+
+                        // Check if there's a width attribute in the format {width=123px}
+                        if (props.src) {
+                            const widthMatch = props.src.match(/\)\{width=(\d+)px\}$/);
+                            if (widthMatch) {
+                                // Set the width in the style
+                                style = { width: `${widthMatch[1]}px` };
+                                // Remove the width attribute from the src
+                                props.src = props.src.replace(/\{width=\d+px\}$/, '');
+                            }
+                        }
+
+                        return (
+                            <img
+                                {...props}
+                                className="max-w-full h-auto"
+                                loading="lazy"
+                                alt={altText}
+                                style={style}
+                            />
+                        );
+                    },
                     a: ({ ...props }) => (
                         <a
                             {...props}
