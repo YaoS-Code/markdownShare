@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  markdownshare:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: markdownshare
+    restart: unless-stopped
+    ports:
+      - "${PORT:-9527}:3000"
+    environment:
+      - NODE_ENV=production
+      - WEBDAV_URL=${WEBDAV_URL}
+      - WEBDAV_USERNAME=${WEBDAV_USERNAME}
+      - WEBDAV_PASSWORD=${WEBDAV_PASSWORD}
+    volumes:
+      - ./logs:/app/logs 
