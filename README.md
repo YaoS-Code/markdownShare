@@ -1,74 +1,60 @@
-# Markdown 知识库
+# Markdown Share
 
-这是一个基于 WebDAV 的 Markdown 文档查看器，专为查看和分享知识库内容而设计。
+一个简洁的 Markdown 文件查看器，支持 WebDAV 协议，可以直接连接到您的 WebDAV 服务器浏览和查看 Markdown 文件。特别适合查看 Obsidian 笔记库中的文件。
 
 ## 功能特点
 
-- 浏览 WebDAV 服务器上的文件和文件夹
-- 查看 Markdown 文件内容，支持 Markdown 格式化
-- 响应式设计，适配各种设备
-- 支持暗色模式
-- 简洁直观的用户界面
+- 支持 WebDAV 协议，可连接任何 WebDAV 服务器
+- 支持 Obsidian 格式的 Markdown 文件
+- 支持 Obsidian 属性表格显示
+- 支持图片显示（包括本地图片和网络图片）
+- 响应式设计，适配桌面和移动设备
+- 支持深色模式和浅色模式
+- Docker 部署支持
 
-## Docker 部署
+## 快速开始
 
-### 前提条件
-
-- Docker 和 Docker Compose 已安装
-- 有可访问的 WebDAV 服务器
-
-### 部署步骤
+### 使用 Docker 部署
 
 1. 克隆仓库：
 
 ```bash
 git clone <repository-url>
-cd markdownshare
+cd markdownShare
 ```
 
-2. 创建环境变量文件：
-
-```bash
-cp .env.example .env
-```
-
-3. 编辑`.env`文件，填入您的 WebDAV 服务器信息：
+2. 编辑`.env`文件，填入您的 WebDAV 服务器信息：
 
 ```
-# 应用配置（可选）
-PORT=9527  # 可以修改为任何未被占用的端口
+# 应用配置
+PORT=9527
 # CORS配置，多个域名用逗号分隔，使用*允许所有域名
-ALLOWED_ORIGINS=*  # 生产环境建议设置为特定域名
+ALLOWED_ORIGINS=*
 
-# WebDAV配置（必填）
+# WebDAV配置
 WEBDAV_URL=https://your-webdav-server.com
-WEBDAV_USERNAME=your_username
-WEBDAV_PASSWORD=your_password
+WEBDAV_USERNAME=username
+WEBDAV_PASSWORD=password
 ```
 
-4. 构建并启动 Docker 容器：
+3. 构建并启动 Docker 容器：
 
 ```bash
-docker-compose up -d
-```
-
-5. 访问应用：
-
-打开浏览器，访问 `http://your-server-ip:9527`
-
-### 更新应用
-
-```bash
-git pull
-docker-compose down
 docker-compose up -d --build
 ```
 
-## 手动部署
+4. 访问应用：
 
-如果您想手动部署而不使用 Docker：
+浏览器打开 `http://localhost:9527` 即可访问应用。
 
-1. 确保 Node.js 18 或更高版本已安装
+### 本地开发
+
+1. 克隆仓库：
+
+```bash
+git clone <repository-url>
+cd markdownShare
+```
 
 2. 安装依赖：
 
@@ -79,143 +65,88 @@ npm install
 3. 创建`.env.local`文件并配置 WebDAV 信息：
 
 ```
-WEBDAV_URL=https://your-webdav-server.com
-WEBDAV_USERNAME=your_username
-WEBDAV_PASSWORD=your_password
+NEXT_PUBLIC_WEBDAV_URL="https://your-webdav-server.com"
+NEXT_PUBLIC_WEBDAV_USERNAME="username"
+NEXT_PUBLIC_WEBDAV_PASSWORD="password"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+WEBDAV_URL="https://your-webdav-server.com"
+WEBDAV_USERNAME="username"
+WEBDAV_PASSWORD="password"
+OBSIDIAN_PATH="/Obisidian"
 ```
 
-4. 构建应用：
-
-```bash
-npm run build
-```
-
-5. 启动应用：
-
-```bash
-npm start
-```
-
-## 使用说明
-
-- 左侧导航栏显示文件和文件夹结构
-- 点击文件夹可以展开/折叠文件夹内容
-- 点击文件可以查看文件内容
-- 可以通过左上角的按钮展开/折叠导航栏
-
-## 技术栈
-
-- Next.js
-- React
-- TypeScript
-- WebDAV 客户端
-- Tailwind CSS
-
-## 主要特点
-
-- **现代化界面**: 提供专业的教育主题设计，支持亮色/暗色模式
-- **侧边导航栏**: 直接在侧边栏展示完整的文件和文件夹结构，便于浏览
-- **Markdown 渲染**: 支持 Obsidian 特定的 Markdown 语法，包括图片、链接和嵌入内容
-- **WebDAV 集成**: 直接连接到 WebDAV 服务器，无需额外配置
-- **响应式设计**: 在不同设备上提供良好的用户体验
-- **教育目的优化**: 为教学资料、教育文档展示和知识共享优化
-
-## 环境要求
-
-- Node.js 18+
-- 一个 WebDAV 服务器（如 Obsidian Sync、NextCloud 等）
-
-## 配置说明
-
-1. 复制`.env.example`到`.env.local`并设置以下变量：
-
-```bash
-WEBDAV_URL=https://your-webdav-server.com
-WEBDAV_USERNAME=your_username
-WEBDAV_PASSWORD=your_password
-```
-
-2. 确保 WebDAV 服务器已启用并可访问
-
-## 开发指南
-
-### 安装依赖
-
-```bash
-npm install
-# 或
-yarn install
-# 或
-pnpm install
-```
-
-### 启动开发服务器
+4. 启动开发服务器：
 
 ```bash
 npm run dev
-# 或
-yarn dev
-# 或
-pnpm dev
 ```
 
-打开 [http://localhost:3000](http://localhost:3000) 查看应用。
+5. 访问应用：
 
-### 构建应用
+浏览器打开 `http://localhost:3000` 即可访问应用。
 
-```bash
-npm run build
-# 或
-yarn build
-# 或
-pnpm build
-```
-
-### 启动生产服务器
-
-```bash
-npm start
-# 或
-yarn start
-# 或
-pnpm start
-```
-
-## 文件结构
+## 项目结构
 
 ```
-/
-├── src/
+markdownShare/
+├── public/                # 静态资源
+│   ├── attachments/       # 本地附件目录
+│   └── favicon.ico        # 网站图标
+├── src/                   # 源代码
 │   ├── app/               # Next.js App Router
 │   │   ├── api/           # API路由
-│   │   │   └── webdav/    # WebDAV相关API
-│   │   ├── view/          # 文件查看页面
-│   │   └── page.tsx       # 主页
-│   ├── components/        # 可复用组件
-│   │   ├── FileBrowser.tsx     # 文件浏览器组件
-│   │   ├── MarkdownRenderer.tsx # Markdown渲染器
-│   │   └── SideNav.tsx          # 侧边导航栏
-│   └── lib/               # 实用工具和库
-├── public/                # 静态资源
-└── ...配置文件
+│   │   │   ├── local/     # 本地文件API
+│   │   │   └── webdav/    # WebDAV API
+│   │   ├── file/          # 文件查看页面
+│   │   └── globals.css    # 全局样式
+│   ├── components/        # React组件
+│   │   ├── MarkdownRenderer.tsx  # Markdown渲染器
+│   │   └── SideNav.tsx    # 侧边导航
+│   └── lib/               # 工具库
+│       └── webdav.ts      # WebDAV客户端
+├── .env.example           # 环境变量示例
+├── docker-compose.yml     # Docker配置
+└── Dockerfile             # Docker构建文件
 ```
 
-## 自定义主题
+## 配置说明
 
-应用使用 CSS 变量进行主题定制，可在`src/app/globals.css`中找到并根据需要调整。主要变量包括：
+### 环境变量
 
-- `--sidenav-bg`：侧边栏背景色
-- `--sidenav-text`：侧边栏文本颜色
-- `--content-bg`：内容区背景色
-- `--content-text`：内容区文本颜色
-- 等等
+- `PORT`: 应用运行端口（Docker 模式下）
+- `ALLOWED_ORIGINS`: CORS 允许的域名，多个域名用逗号分隔，使用`*`允许所有域名
+- `WEBDAV_URL`: WebDAV 服务器地址
+- `WEBDAV_USERNAME`: WebDAV 用户名
+- `WEBDAV_PASSWORD`: WebDAV 密码
+- `OBSIDIAN_PATH`: Obsidian 库在 WebDAV 服务器上的路径（可选）
+
+### Docker 配置
+
+项目包含了完整的 Docker 配置，可以通过`docker-compose.yml`文件进行自定义：
+
+```yaml
+version: "3"
+services:
+  markdownshare:
+    build: .
+    ports:
+      - "${PORT:-9527}:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=${PORT:-9527}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - WEBDAV_URL=${WEBDAV_URL}
+      - WEBDAV_USERNAME=${WEBDAV_USERNAME}
+      - WEBDAV_PASSWORD=${WEBDAV_PASSWORD}
+    restart: unless-stopped
+```
 
 ## 常见问题
 
-- **无法连接 WebDAV 服务器**: 确保.env.local 中的凭证正确，并检查服务器是否在线
-- **Markdown 渲染不正确**: 检查 Markdown 语法，注意 Obsidian 特定语法在处理时可能有差异
-- **API 错误**: 查看服务器日志，检查 WebDAV 路径和权限设置
+- **无法连接 WebDAV 服务器**: 确保`.env`或`.env.local`中的凭证正确，并检查服务器是否在线
+- **图片无法显示**: 检查图片路径是否正确，WebDAV 服务器是否支持图片文件的访问
+- **Markdown 格式问题**: 本应用支持标准 Markdown 和部分 Obsidian 特性，如果有格式问题，请检查您的 Markdown 文件
 
-## 许可
+## 许可证
 
 MIT

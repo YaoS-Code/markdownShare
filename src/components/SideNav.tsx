@@ -294,44 +294,25 @@ export default function SideNav({ isOpen: externalIsOpen, onToggle }: SideNavPro
     };
 
     return (
-        <aside className={`sidenav ${isOpen ? 'open' : 'closed'}`}>
-            <div className="sidenav-container">
-                <div className="sidenav-header">
-                    {isOpen && <h2 className="sidenav-title">Knowledge Library</h2>}
-                    <button
-                        onClick={handleToggle}
-                        className="sidenav-toggle"
-                        aria-label={isOpen ? "收起侧边栏" : "展开侧边栏"}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            {isOpen ? (
-                                <polyline points="15 18 9 12 15 6"></polyline>
-                            ) : (
-                                <polyline points="9 18 15 12 9 6"></polyline>
-                            )}
-                        </svg>
-                    </button>
-                </div>
-
-                <div className="sidenav-content">
-                    {isOpen && (
-                        loading ? (
-                            <div className="sidenav-loading">
-                                <svg className="spinner" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <circle className="spinner-circle" cx="12" cy="12" r="10" fill="none" strokeWidth="3"></circle>
-                                </svg>
-                                <span>加载中...</span>
-                            </div>
-                        ) : error ? (
-                            <div className="sidenav-error">{error}</div>
-                        ) : (
-                            <div className="sidenav-tree">
-                                {renderNavItems(rootItems)}
-                            </div>
-                        )
-                    )}
-                </div>
+        <div className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
+            <div className="sidebar-header">
+                <h1 className="sidebar-title">Knowledge Library</h1>
+                <button className="sidebar-toggle" onClick={handleToggle}>
+                    {isOpen ? '←' : '→'}
+                </button>
             </div>
-        </aside>
+
+            <div className="sidebar-content">
+                {loading ? (
+                    <div className="loading">加载中...</div>
+                ) : error ? (
+                    <div className="error">{error}</div>
+                ) : (
+                    <ul className="nav-tree">
+                        {renderNavItems(rootItems)}
+                    </ul>
+                )}
+            </div>
+        </div>
     );
 } 
