@@ -26,24 +26,51 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: `Image not found: ${path}` }, { status: 404 });
         }
 
+        // 尝试获取文件信息
+        try {
+            const stat = await client.stat(path);
+            console.log(`File stat for ${path}:`, JSON.stringify(stat));
+        } catch (statError) {
+            console.warn(`Could not get stat for ${path}:`, statError);
+            // 继续处理，不中断流程
+        }
+
         // 获取图片内容
-        const imageBuffer = await client.getFileContents(path, { format: 'binary' }) as Buffer;
+        let imageBuffer;
+        try {
+            console.log(`Attempting to get file contents for: ${path}`);
+            imageBuffer = await client.getFileContents(path, { format: 'binary' }) as Buffer;
+            console.log(`Successfully retrieved image content, size: ${imageBuffer?.length || 0} bytes`);
+        } catch (contentError) {
+            console.error(`Error getting file contents for ${path}:`, contentError);
+            return NextResponse.json({ 
+                error: `Failed to get image content: ${contentError instanceof Error ? contentError.message : String(contentError)}` 
+            }, { status: 500 });
+        }
+        
+        if (!imageBuffer || imageBuffer.length === 0) {
+            console.error(`Empty image content for ${path}`);
+            return NextResponse.json({ error: 'Image content is empty' }, { status: 500 });
+        }
         
         // 确定Content-Type
         let contentType = 'image/jpeg'; // 默认
         
         // 根据文件扩展名设置正确的内容类型
-        if (path.endsWith('.png')) {
+        const lowerPath = path.toLowerCase();
+        if (lowerPath.endsWith('.png')) {
             contentType = 'image/png';
-        } else if (path.endsWith('.jpg') || path.endsWith('.jpeg')) {
+        } else if (lowerPath.endsWith('.jpg') || lowerPath.endsWith('.jpeg')) {
             contentType = 'image/jpeg';
-        } else if (path.endsWith('.gif')) {
+        } else if (lowerPath.endsWith('.gif')) {
             contentType = 'image/gif';
-        } else if (path.endsWith('.webp')) {
+        } else if (lowerPath.endsWith('.webp')) {
             contentType = 'image/webp';
-        } else if (path.endsWith('.svg')) {
+        } else if (lowerPath.endsWith('.svg')) {
             contentType = 'image/svg+xml';
         }
+        
+        console.log(`Serving image ${path} with content type: ${contentType}`);
         
         // 创建响应
         const response = new NextResponse(imageBuffer);

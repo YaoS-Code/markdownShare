@@ -2,9 +2,26 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createWebDAVClient } from '@/lib/webdav';
 import { WebDAVClient } from 'webdav';
 
+// 检查路径是否为图片文件
+function isImageFile(path: string): boolean {
+    const lowerPath = path.toLowerCase();
+    return lowerPath.endsWith('.png') || 
+           lowerPath.endsWith('.jpg') || 
+           lowerPath.endsWith('.jpeg') || 
+           lowerPath.endsWith('.gif') || 
+           lowerPath.endsWith('.svg') || 
+           lowerPath.endsWith('.webp');
+}
+
 // 更可靠的方式检查路径是否为目录
 async function isDirectorySafe(client: WebDAVClient, path: string): Promise<boolean> {
     try {
+        // 对于图片文件，直接返回false（不是目录）
+        if (isImageFile(path)) {
+            console.log(`Path "${path}" is an image file, treating as file not directory`);
+            return false;
+        }
+        
         // 首先尝试使用stat方法获取文件信息
         const stat = await client.stat(path);
         
@@ -48,7 +65,8 @@ async function isDirectorySafe(client: WebDAVClient, path: string): Promise<bool
         if (path.endsWith('.md') || path.endsWith('.markdown') || 
             path.endsWith('.txt') || path.endsWith('.html') || 
             path.endsWith('.css') || path.endsWith('.js') || 
-            path.endsWith('.json') || path.endsWith('.xml')) {
+            path.endsWith('.json') || path.endsWith('.xml') ||
+            isImageFile(path)) {
             // 如果路径以常见文件扩展名结尾，则很可能是文件
             return false;
         }
@@ -95,10 +113,10 @@ export async function GET(request: NextRequest) {
         // 如果存在，检查是文件还是目录
         let isDirectory = false;
         if (exists || finalPath !== correctedPath) {
-            // 对于.md文件，强制将其视为文件而非目录
-            if (finalPath.endsWith('.md')) {
+            // 对于.md文件和图片文件，强制将其视为文件而非目录
+            if (finalPath.endsWith('.md') || isImageFile(finalPath)) {
                 isDirectory = false;
-                console.log(`Path "${finalPath}" is forced to be treated as file because it ends with .md`);
+                console.log(`Path "${finalPath}" is forced to be treated as file because it is a markdown or image file`);
             } else {
                 isDirectory = await isDirectorySafe(client, finalPath);
                 console.log(`Path "${finalPath}" exists and is a ${isDirectory ? 'directory' : 'file'}`);

@@ -29,8 +29,8 @@ export default function FileBrowser() {
                 }
 
                 console.log('Files fetched successfully:', data);
-                // 直接在设置文件列表前过滤隐藏文件
-                setFiles(hideHiddenFiles(data));
+                // 直接在设置文件列表前过滤隐藏文件和attachments文件夹
+                setFiles(filterFiles(data));
             } catch (err) {
                 const errorMessage = err instanceof Error ? err.message : 'Failed to fetch files';
                 setError(errorMessage);
@@ -46,9 +46,21 @@ export default function FileBrowser() {
         setCurrentPath(path);
     };
 
-    // 过滤隐藏文件，即以.开头的文件或文件夹
-    const hideHiddenFiles = (files: FileItem[]) => {
-        return files.filter(file => !file.basename.startsWith('.'));
+    // 过滤隐藏文件和attachments文件夹
+    const filterFiles = (files: FileItem[]) => {
+        return files.filter(file => {
+            // 过滤掉以.开头的隐藏文件
+            if (file.basename.startsWith('.')) {
+                return false;
+            }
+
+            // 过滤掉attachments文件夹
+            if (file.type === 'directory' && file.basename.toLowerCase() === 'attachments') {
+                return false;
+            }
+
+            return true;
+        });
     };
 
     if (error) {

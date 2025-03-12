@@ -26,12 +26,14 @@ export default function MarkdownRenderer({ content, filePath, basePath }: Markdo
             ? filePath.substring(0, filePath.lastIndexOf('/'))
             : '/');
 
+        console.log(`Processing markdown with directoryPath: ${directoryPath}`);
+
         // Process image paths to make them relative to the WebDAV server
         // Convert Obsidian image markdown format ![alt](attachment/image.png) to proper URLs
         newContent = newContent.replace(
             /!\[(.*?)\]\((.*?)\)/g,
             (match, alt, src) => {
-                // If the path is already absolute, return as is
+                // If the path is already absolute URL, return as is
                 if (src.startsWith('http://') || src.startsWith('https://')) {
                     return match;
                 }
@@ -40,11 +42,72 @@ export default function MarkdownRenderer({ content, filePath, basePath }: Markdo
                 if (src.startsWith('./') || src.startsWith('../') || !src.startsWith('/')) {
                     // Relative path - build proper path based on current file location
                     const absoluteSrc = `${directoryPath}/${src.replace(/^\.\//, '')}`;
+                    console.log(`Converting relative image path: ${src} to absolute: ${absoluteSrc}`);
                     return `![${alt}](/api/webdav/image?path=${encodeURIComponent(absoluteSrc)})`;
                 }
 
                 // Already absolute path
+                console.log(`Using absolute image path: ${src}`);
                 return `![${alt}](/api/webdav/image?path=${encodeURIComponent(src)})`;
+            }
+        );
+
+        // Process HTML img tags to handle relative paths
+        newContent = newContent.replace(
+            /<img\s+([^>]*?)src=["'](.*?)["']([^>]*?)>/gi,
+            (match, beforeSrc, src, afterSrc) => {
+                // If the path is already absolute URL, return as is
+                if (src.startsWith('http://') || src.startsWith('https://')) {
+                    return match;
+                }
+
+                // If the path is a local public file (starts with /), return as is
+                if (src.startsWith('/') && !src.startsWith('/api/webdav')) {
+                    return match;
+                }
+
+                // Check if the image is using a relative path
+                if (src.startsWith('./') || src.startsWith('../') || !src.startsWith('/')) {
+                    // Relative path - build proper path based on current file location
+                    const absoluteSrc = `${directoryPath}/${src.replace(/^\.\//, '')}`;
+                    console.log(`Converting relative HTML image path: ${src} to absolute: ${absoluteSrc}`);
+                    return `<img ${beforeSrc}src="/api/webdav/image?path=${encodeURIComponent(absoluteSrc)}"${afterSrc}>`;
+                }
+
+                // Already absolute path (but not a public file)
+                console.log(`Using absolute HTML image path: ${src}`);
+                return `<img ${beforeSrc}src="/api/webdav/image?path=${encodeURIComponent(src)}"${afterSrc}>`;
+            }
+        );
+
+        // Special handling for <image> tags (non-standard but sometimes used)
+        newContent = newContent.replace(
+            /<image\s+([^>]*?)src=["'](.*?)["']([^>]*?)>/gi,
+            (match, beforeSrc, src, afterSrc) => {
+                // Convert <image> to <img>
+                console.log(`Converting <image> tag to <img> tag for src: ${src}`);
+
+                // If the path is already absolute URL, return as is but with img tag
+                if (src.startsWith('http://') || src.startsWith('https://')) {
+                    return `<img ${beforeSrc}src="${src}"${afterSrc}>`;
+                }
+
+                // If the path is a local public file (starts with /), return as is but with img tag
+                if (src.startsWith('/') && !src.startsWith('/api/webdav')) {
+                    return `<img ${beforeSrc}src="${src}"${afterSrc}>`;
+                }
+
+                // Check if the image is using a relative path
+                if (src.startsWith('./') || src.startsWith('../') || !src.startsWith('/')) {
+                    // Relative path - build proper path based on current file location
+                    const absoluteSrc = `${directoryPath}/${src.replace(/^\.\//, '')}`;
+                    console.log(`Converting relative <image> path: ${src} to absolute: ${absoluteSrc}`);
+                    return `<img ${beforeSrc}src="/api/webdav/image?path=${encodeURIComponent(absoluteSrc)}"${afterSrc}>`;
+                }
+
+                // Already absolute path (but not a public file)
+                console.log(`Using absolute <image> path: ${src}`);
+                return `<img ${beforeSrc}src="/api/webdav/image?path=${encodeURIComponent(src)}"${afterSrc}>`;
             }
         );
 

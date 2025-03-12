@@ -44,9 +44,21 @@ export default function SideNav({ isOpen: externalIsOpen, onToggle }: SideNavPro
         }
     };
 
-    // 过滤隐藏文件(以.开头的文件或文件夹)
-    const filterHiddenItems = (items: FileItem[]) => {
-        return items.filter(item => !item.basename.startsWith('.'));
+    // 过滤隐藏文件(以.开头的文件或文件夹)和attachments文件夹
+    const filterItems = (items: FileItem[]) => {
+        return items.filter(item => {
+            // 过滤掉以.开头的隐藏文件
+            if (item.basename.startsWith('.')) {
+                return false;
+            }
+
+            // 过滤掉attachments文件夹
+            if (item.type === 'directory' && item.basename.toLowerCase() === 'attachments') {
+                return false;
+            }
+
+            return true;
+        });
     };
 
     useEffect(() => {
@@ -61,8 +73,8 @@ export default function SideNav({ isOpen: externalIsOpen, onToggle }: SideNavPro
                 }
                 const data = await response.json();
 
-                // 过滤隐藏文件
-                const filteredData = filterHiddenItems(data);
+                // 过滤隐藏文件和attachments文件夹
+                const filteredData = filterItems(data);
 
                 // 转换API返回数据为导航项
                 const navItems: NavItem[] = filteredData.map((item: FileItem) => ({
@@ -111,8 +123,8 @@ export default function SideNav({ isOpen: externalIsOpen, onToggle }: SideNavPro
             }
             const data = await response.json();
 
-            // 过滤隐藏文件
-            const filteredData = filterHiddenItems(data);
+            // 过滤隐藏文件和attachments文件夹
+            const filteredData = filterItems(data);
 
             // 转换所有项目（包括文件和文件夹）
             const items: NavItem[] = filteredData.map((item: FileItem) => ({
